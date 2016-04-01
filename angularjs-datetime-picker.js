@@ -12,7 +12,7 @@
     var offset = isDST ? stdTimezoneOffset - 60 : stdTimezoneOffset;
     var diff = offset >=0 ? '-' : '+';
     return diff +
-      ("0"+ (offset / 60)).slice(-2) + ':' +
+      ("0"+ Math.floor(Math.abs(offset / 60))).slice(-2) + ':' +
       ("0"+ (offset % 60)).slice(-2);
   };
 
@@ -105,33 +105,7 @@
   DatetimePickerCtrl.$inject = ['$compile', '$document'];
   angular.module('angularjs-datetime-picker').controller('DatetimePickerCtrl', DatetimePickerCtrl);
 
-  var tmpl = [
-    '<div class="angularjs-datetime-picker">' ,
-    '  <div class="adp-month">',
-    '    <button type="button" class="adp-prev" ng-click="addMonth(-1)">&laquo;</button>',
-    '    <span title="{{months[mv.month].fullName}}">{{months[mv.month].shortName}}</span> {{mv.year}}',
-    '    <button type="button" class="adp-next" ng-click="addMonth(1)">&raquo;</button>',
-    '  </div>',
-    '  <div class="adp-days" ng-click="setDate($event)">',
-    '    <div class="adp-day-of-week" ng-repeat="dayOfWeek in ::daysOfWeek" title="{{dayOfWeek.fullName}}">{{::dayOfWeek.firstLetter}}</div>',
-    '    <div class="adp-day" ng-show="mv.leadingDays.length < 7" ng-repeat="day in mv.leadingDays">{{::day}}</div>',
-    '    <div class="adp-day selectable" ng-repeat="day in mv.days" ',
-    '      today="{{today}}" d2="{{mv.year + \'-\' + (mv.month + 1) + \'-\' + day}}"',
-    '      ng-class="{',
-    '        selected: (day == selectedDay),',
-    '        today: (today == (mv.year + \'-\' + (mv.month + 1) + \'-\' + day)),',
-    '        weekend: (mv.leadingDays.length + day)%7 == 1 || (mv.leadingDays.length + day)%7 == 0',
-    '      }">',
-    '      {{::day}}',
-    '    </div>',
-    '    <div class="adp-day" ng-show="mv.trailingDays.length < 7" ng-repeat="day in mv.trailingDays">{{::day}}</div>',
-    '  </div>',
-    '  <div class="adp-days" id="adp-time"> ',
-    '    <label class="timeLabel">Time:</label> <span class="timeValue">{{("0"+inputHour).slice(-2)}} : {{("0"+inputMinute).slice(-2)}}</span><br/>',
-    '    <label class="hourLabel">Hour:</label> <input class="hourInput" type="range" min="0" max="23" ng-model="inputHour" ng-change="updateNgModel()" />',
-    '    <label class="minutesLabel">Min:</label> <input class="minutesInput" type="range" min="0" max="59" ng-model="inputMinute"  ng-change="updateNgModel()"/> ',
-    '  </div> ',
-    '</div>'].join("\n");
+  var tmpl = '<div class="jrdp_calendar_pos"><table class="jrdp_encapsulated_table" cellspacing="0" cellpadding="0"><tbody><tr><td class="jrdp_calendar_box"><table class="jrdp_calendar_multi" cellspacing="0" cellpadding="0"><tbody><tr class="jrdp_calendar_month_tbar_multi"><td colspan="1" class="limitPrevious jrdp_calendar_month_prev_multi" align="left" ng-click="addMonth(-1)"><span class="width100 fl">&laquo;</span></td><td colspan="5" class="jrdp_calendar_month_multi" align="center" title="{{months[mv.month].fullName}}">{{months[mv.month].shortName}} {{mv.year}}</td><td colspan="1" class="jrdp_calendar_month_next_multi" align="right" ng-click="addMonth(1)"><span class="width100 fl">&raquo;</span></td></tr><tr><td class="jrdp_calendar_days_multi" ng-repeat="dayOfWeek in ::daysOfWeek" title="{{dayOfWeek.fullName}}"><div class="adp-day">{{::dayOfWeek.firstLetter}}</div></td></tr><tr><td colspan="7" ng-click="setDate($event)"><div class="jrdp_calendar_day1_noselect_multi adp-day" ng-show="mv.leadingDays.length < 7" ng-repeat="day in mv.leadingDays"><div class="calDate"><span>{{::day}}</span></div></div><div class="jrdp_calendar_day1_multi adp-day selectable" ng-repeat="day in mv.days" day="{{day}}" today="{{today}}" d2="{{mv.year + \'-\' + (mv.month + 1) + \'-\' + day}}" ng-class="{jrdp_calendar_current_day_multi: (day == selectedDay) || (today == (mv.year + \'-\' + (mv.month + 1) + \'-\' + day) && !selectedDay)}"><div class="calDate selectable" day="{{day}}"><span class="selectable" day="{{day}}">{{::day}}</span></div></div><div class="jrdp_calendar_day1_noselect_multi adp-day" ng-show="mv.trailingDays.length < 7" ng-repeat="day in mv.trailingDays"><div class="calDate"><span>{{::day}}</span></div></div></td></tr></tbody></table></td><td class="jrdp_calendar_box"><table class="jrdp_calendar_multi" cellspacing="0" cellpadding="0"><tbody><tr class="jrdp_calendar_month_tbar_multi"><td colspan="5" class="jrdp_calendar_month_multi" align="center" title="Select Hours">Hours</td></tr><tr><td colspan="7" ng-click="setHour($event)"><div class="jrdp_calendar_day1_multi adp-day" ng-repeat="hour in [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23]" hour="{{hour}}" ng-class="{jrdp_calendar_current_day_multi: (hour == inputHour)}"><div class="calDate" hour="{{hour}}"><span hour="{{hour}}">{{hour}}</span></div></div></td></tr><tr class="jrdp_calendar_month_tbar_multi"><td colspan="5" class="jrdp_calendar_month_multi" align="center" title="Select Minutes">Minutes</td></tr><tr><td colspan="7" ng-click="setMinute($event)"><div class="jrdp_calendar_day1_multi adp-day" ng-repeat="minute in [0, 5,10,15,20,25,30,35,40,45,50,55]" minute="{{minute}}" ng-class="{jrdp_calendar_current_day_multi: (minute == inputMinute)}"><div class="calDate" minute="{{minute}}"><span minute="{{minute}}">{{minute}}</span></div></div></td></tr></tbody></table></td></tr></tbody></table></div>';
 
   var datetimePickerPopup = function($locale, dateFilter){
     var days, months, daysOfWeek, firstDayOfWeek;
@@ -231,8 +205,8 @@
           var year = scope.year || today.getFullYear();
           var month = scope.month ? (scope.month-1) : today.getMonth();
           var day = scope.day || today.getDate();
-          var hour = scope.hour == 0 ? 0 : (scope.hour || today.getHours());
-          var minute = scope.minute == 0 ? 0 : (scope.minute || today.getMinutes());
+          var hour = (scope.hour == 0 ? 0 : (scope.hour ? scope.hour : today.getHours()));
+          var minute = (scope.minute == 0 ? 0 : (scope.minute ? scope.minute : today.getMinutes()));
           scope.selectedDate = new Date(year, month, day, hour, minute, 0);
         }
         scope.inputHour   = scope.selectedDate.getHours();
@@ -255,10 +229,22 @@
       scope.setDate = function (evt) {
         var target = angular.element(evt.target)[0];
         if (target.className.indexOf('selectable') !== -1) {
-          scope.updateNgModel(parseInt(target.innerHTML));
-          if (scope.closeOnSelect !== false) {
-            ctrl.closeDatetimePicker();
-          }
+          scope.updateNgModel(parseInt(target.getAttribute('day')));
+        }
+      };
+
+      scope.setHour = function (evt) {
+        var target = angular.element(evt.target)[0];
+        scope.inputHour = parseInt(target.getAttribute('hour'));
+        scope.updateNgModel();
+      };
+
+      scope.setMinute = function (evt) {
+        var target = angular.element(evt.target)[0];
+        scope.inputMinute = parseInt(target.getAttribute('minute'));
+        scope.updateNgModel();
+        if (scope.closeOnSelect !== false) {
+          ctrl.closeDatetimePicker();
         }
       };
 
